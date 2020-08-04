@@ -10,12 +10,14 @@ namespace ChessNelioAlves
         {
             for(int row = 0; row < board.Rows; row++)
             {
+                Console.Write($"{board.Rows - row} ");
                 for (int col = 0; col < board.Columns; col++)
                 {
                     Piece piece = board.GetPieceAt(row, col);
                     if (piece != null)
                     {
-                        Console.Write($"{piece} ");
+                        RenderPiece(piece);
+                        Console.Write(" ");
                     }
                     else
                     {
@@ -24,6 +26,30 @@ namespace ChessNelioAlves
                 }
 
                 Console.WriteLine();
+            }
+
+            Console.WriteLine("  A B C D E F G H ");
+        }
+
+        public static void RenderPiece(Piece piece)
+        {
+            if (piece.Color == Color.White)
+            {
+                Console.Write(piece);
+            }
+            else if (piece.Color == Color.Black)
+            {
+                ConsoleColor consoleColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.Write(piece);
+                Console.ForegroundColor = consoleColor;
+            }
+            else
+            {
+                ConsoleColor consoleColor = Console.ForegroundColor;
+                Console.ForegroundColor = Enum.Parse<ConsoleColor>(piece.Color.ToString());
+                Console.Write(piece);
+                Console.ForegroundColor = consoleColor;
             }
         }
     }

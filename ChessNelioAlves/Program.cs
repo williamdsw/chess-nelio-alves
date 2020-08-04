@@ -10,15 +10,13 @@ namespace ChessNelioAlves
         {
             try
             {
-                BoardPosition boardPositionA1 = new BoardPosition('a', 1);
-                BoardPosition boardPositionC7 = new BoardPosition('c', 7);
+                Board board = new Board(8, 8);
+                board.InsertPieceAt(new Pawn(board, Color.Green), new Position(0, 0));
+                board.InsertPieceAt(new Queen(board, Color.Black), new Position(3, 6));
+                board.InsertPieceAt(new King(board, Color.Blue), new Position(2, 3));
+                board.InsertPieceAt(new Knight(board, Color.White), new Position(5, 4));
 
-                Console.WriteLine(boardPositionA1);
-                Console.WriteLine(boardPositionA1.ToPosition());
-                Console.WriteLine(boardPositionC7);
-                Console.WriteLine(boardPositionC7.ToPosition());
-
-                Console.ReadLine();
+                Screen.RenderBoard(board);
             }
             catch(BoardException exception)
             {
@@ -28,6 +26,8 @@ namespace ChessNelioAlves
             {
                 Console.WriteLine(exception.Message);
             }
+
+            Console.ReadLine();
         }
     }
 }
