@@ -15,7 +15,7 @@ namespace Entities
 
         public override string ToString()
         {
-            return $"Position: {Row}, {Column}";
+            return $"{Row}, {Column}";
         }
     }
 }
