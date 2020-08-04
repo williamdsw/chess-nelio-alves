@@ -20,5 +20,11 @@ namespace Entities
         {
             return pieces[row, column];
         }
+
+        public void InsertPieceAt(Piece piece, Position position)
+        {
+            pieces[position.Row, position.Column] = piece;
+            piece.Position = position;
+        }
     }
 }
