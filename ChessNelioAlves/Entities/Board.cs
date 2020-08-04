@@ -15,5 +15,10 @@ namespace Entities
             Columns = columns;
             pieces = new Piece[rows, columns];
         }
+
+        public Piece GetPieceAt(int row, int column)
+        {
+            return pieces[row, column];
+        }
     }
 }
