@@ -1,4 +1,4 @@
-﻿using Board;
+﻿using Entities;
 using System;
 
 namespace ChessNelioAlves
@@ -7,8 +7,7 @@ namespace ChessNelioAlves
     {
         static void Main(string[] args)
         {
-            Position position = new Position(3, 4);
-            Console.WriteLine(position);
+            Board board = new Board(8, 8);
             Console.ReadLine();
         }
     }

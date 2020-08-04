@@ -1,5 +1,5 @@
 ﻿
-namespace Board
+namespace Entities
 {
     public class Position
     {
