@@ -10,13 +10,21 @@ namespace ChessNelioAlves
         {
             try
             {
-                Board board = new Board(8, 8);
-                board.InsertPieceAt(new Pawn(board, Color.Green), new Position(0, 0));
-                board.InsertPieceAt(new Queen(board, Color.Black), new Position(3, 6));
-                board.InsertPieceAt(new King(board, Color.Blue), new Position(2, 3));
-                board.InsertPieceAt(new Knight(board, Color.White), new Position(5, 4));
+                ChessMatch chessMatch = new ChessMatch();
 
-                Screen.RenderBoard(board);
+                while (!chessMatch.EndMatch)
+                {
+                    Console.Clear();
+                    Screen.RenderBoard(chessMatch.Board);
+
+                    Console.WriteLine();
+                    Console.Write("Input origin position: ");
+                    Position origin = Screen.ReadPosition().ToPosition();
+                    Console.Write("Input destiny position: ");
+                    Position destiny = Screen.ReadPosition().ToPosition();
+
+                    chessMatch.ExecuteMovement(origin, destiny);
+                }
             }
             catch(BoardException exception)
             {

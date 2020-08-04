@@ -47,6 +47,19 @@ namespace Entities
             piece.Position = position;
         }
 
+        public Piece RemovePieceAt(Position position)
+        {
+            if (GetPieceAt(position) == null)
+            {
+                return null;
+            }
+
+            Piece piece = GetPieceAt(position);
+            piece.Position = null;
+            pieces[position.Row, position.Column] = null;
+            return piece;
+        }
+
         public bool PositionExists (Position position)
         {
             return !(position.Row < 0 || position.Row >= Rows || position.Column < 0 || position.Column >= Columns);

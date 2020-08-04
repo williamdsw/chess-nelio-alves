@@ -1,6 +1,7 @@
 ﻿
 using Entities;
 using System;
+using System.Data;
 
 namespace ChessNelioAlves
 {
@@ -51,6 +52,14 @@ namespace ChessNelioAlves
                 Console.Write(piece);
                 Console.ForegroundColor = consoleColor;
             }
+        }
+
+        public static BoardPosition ReadPosition()
+        {
+            string position = Console.ReadLine();
+            char column = position[0];
+            int row = int.Parse(position[1] + "");
+            return new BoardPosition(column, row);
         }
     }
 }

@@ -16,5 +16,10 @@ namespace Entities
             Color = color;
             NumberOfMovements = 0;
         }
+
+        public void IncrementNumberOfMovements()
+        {
+            NumberOfMovements++;
+        }
     }
 }
