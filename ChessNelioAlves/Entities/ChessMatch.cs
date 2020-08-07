@@ -4,15 +4,15 @@ namespace Entities
     public class ChessMatch
     {
         public Board Board { get; private set; }
-        private int turn;
-        private Color actualPlayer;
+        public int Turn { get; private set; }
+        public Color CurrentPlayer { get; private set; }
         public bool EndMatch { get; private set; }
 
         public ChessMatch()
         {
             Board = new Board(8, 8);
-            turn = 1;
-            actualPlayer = Color.White;
+            Turn = 1;
+            CurrentPlayer = Color.White;
             EndMatch = false;
             InsertPieces();
         }
@@ -23,6 +23,17 @@ namespace Entities
             piece.IncrementNumberOfMovements();
             Piece otherPiece = Board.RemovePieceAt(destiny);
             Board.InsertPieceAt(piece, destiny);
+        }
+
+        public void PerformMove(Position origin, Position destiny)
+        {
+            ExecuteMovement(origin, destiny);
+            Turn++;
+        }
+
+        private void ChangePlayer()
+        {
+            CurrentPlayer = (CurrentPlayer == Color.White ? Color.Black : Color.White);
         }
 
         private void InsertPieces ()

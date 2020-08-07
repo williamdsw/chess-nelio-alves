@@ -16,6 +16,9 @@ namespace ChessNelioAlves
                 {
                     Console.Clear();
                     Screen.RenderBoard(chessMatch.Board);
+                    Console.WriteLine();
+                    Console.WriteLine($"Turn: {chessMatch.Turn}");
+                    Console.WriteLine($"Waiting for player {chessMatch.CurrentPlayer}");
 
                     Console.WriteLine();
                     Console.Write("Input origin position: ");
@@ -30,7 +33,7 @@ namespace ChessNelioAlves
                     Console.Write("Input destiny position: ");
                     Position destiny = Screen.ReadPosition().ToPosition();
 
-                    chessMatch.ExecuteMovement(origin, destiny);
+                    chessMatch.PerformMove(origin, destiny);
                 }
             }
             catch(BoardException exception)
