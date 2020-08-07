@@ -1,4 +1,6 @@
 ﻿
+using Entities.Exceptions;
+
 namespace Entities
 {
     public class ChessMatch
@@ -29,11 +31,43 @@ namespace Entities
         {
             ExecuteMovement(origin, destiny);
             Turn++;
+            ChangePlayer();
         }
 
         private void ChangePlayer()
         {
             CurrentPlayer = (CurrentPlayer == Color.White ? Color.Black : Color.White);
+        }
+
+        public void ValidateOriginPosition(Position position)
+        {
+            if (!Board.PositionExists(position))
+            {
+                throw new ChessException($"Choose a valid board position!");
+            }
+
+            if (Board.GetPieceAt(position) == null)
+            {
+                throw new ChessException($"There's no piece at this origin position: {position}");
+            }
+
+            if (CurrentPlayer != Board.GetPieceAt(position).Color)
+            {
+                throw new ChessException($"Origin piece it's not yours!");
+            }
+
+            if (!Board.GetPieceAt(position).PossibleMovementsExists())
+            {
+                throw new ChessException($"There is no possible movements for choose origin piece!");
+            }
+        }
+
+        public void ValidateDestinyPosition(Position origin, Position destiny)
+        {
+            if (!Board.GetPieceAt(origin).CanMoveTo(destiny))
+            {
+                throw new ChessException($"Invalid destiny position: {destiny}");
+            }
         }
 
         private void InsertPieces ()

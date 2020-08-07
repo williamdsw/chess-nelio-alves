@@ -29,5 +29,27 @@ namespace Entities
             Piece piece = Board.GetPieceAt(position);
             return piece == null || piece.Color != this.Color;
         }
+
+        public bool PossibleMovementsExists()
+        {
+            bool[,] possibleMovements = PossibleMovements();
+            for (int row = 0; row < Board.Rows; row++)
+            {
+                for (int col = 0; col < Board.Columns; col++)
+                {
+                    if (possibleMovements[row, col])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public bool CanMoveTo(Position position)
+        {
+            return PossibleMovements()[position.Row, position.Column];
+        }
     }
 }

@@ -8,11 +8,11 @@ namespace ChessNelioAlves
     {
         static void Main(string[] args)
         {
-            try
-            {
-                ChessMatch chessMatch = new ChessMatch();
+            ChessMatch chessMatch = new ChessMatch();
 
-                while (!chessMatch.EndMatch)
+            while (!chessMatch.EndMatch)
+            {
+                try
                 {
                     Console.Clear();
                     Screen.RenderBoard(chessMatch.Board);
@@ -24,6 +24,8 @@ namespace ChessNelioAlves
                     Console.Write("Input origin position: ");
                     Position origin = Screen.ReadPosition().ToPosition();
 
+                    chessMatch.ValidateOriginPosition(origin);
+
                     bool[,] possiblePositions = chessMatch.Board.GetPieceAt(origin).PossibleMovements();
 
                     Console.Clear();
@@ -33,16 +35,19 @@ namespace ChessNelioAlves
                     Console.Write("Input destiny position: ");
                     Position destiny = Screen.ReadPosition().ToPosition();
 
+                    chessMatch.ValidateDestinyPosition(origin, destiny);
+
                     chessMatch.PerformMove(origin, destiny);
                 }
-            }
-            catch(BoardException exception)
-            {
-                Console.WriteLine(exception.Message);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception.Message);
+                catch (ChessException exception)
+                {
+                    Console.WriteLine(exception.Message);
+                    Console.ReadLine();
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
             }
 
             Console.ReadLine();

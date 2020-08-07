@@ -40,7 +40,7 @@ namespace Entities
         {
             if (PieceExists(position))
             {
-                throw new BoardException($"A piece already exists at position {position}!");
+                throw new ChessException($"A piece already exists at position {position}!");
             }
 
             pieces[position.Row, position.Column] = piece;
@@ -75,7 +75,7 @@ namespace Entities
         {
             if (!PositionExists(position))
             {
-                throw new BoardException($"Invalid Position at {position} !");
+                throw new ChessException($"Invalid Position at {position} !");
             }
         }
     }
