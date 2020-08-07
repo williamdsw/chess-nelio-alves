@@ -10,5 +10,10 @@ namespace Entities
         {
             return "P";
         }
+
+        public override bool[,] PossibleMovements()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 namespace Entities
 {
-    public class Piece
+    public abstract class Piece
     {
         public Position Position { get; set; }
         public Color Color { get; protected set; }
@@ -20,6 +20,14 @@ namespace Entities
         public void IncrementNumberOfMovements()
         {
             NumberOfMovements++;
+        }
+
+        public abstract bool[,] PossibleMovements();
+
+        protected bool CanMoveToPosition(Position position)
+        {
+            Piece piece = Board.GetPieceAt(position);
+            return piece == null || piece.Color != this.Color;
         }
     }
 }

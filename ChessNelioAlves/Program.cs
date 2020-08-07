@@ -20,6 +20,13 @@ namespace ChessNelioAlves
                     Console.WriteLine();
                     Console.Write("Input origin position: ");
                     Position origin = Screen.ReadPosition().ToPosition();
+
+                    bool[,] possiblePositions = chessMatch.Board.GetPieceAt(origin).PossibleMovements();
+
+                    Console.Clear();
+                    Screen.RenderBoard(chessMatch.Board, possiblePositions);
+
+                    Console.WriteLine();
                     Console.Write("Input destiny position: ");
                     Position destiny = Screen.ReadPosition().ToPosition();
 
