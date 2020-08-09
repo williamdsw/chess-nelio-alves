@@ -6,12 +6,20 @@ namespace Entities
 {
     public class ChessMatch
     {
+        // FIELDS
+
+        private HashSet<Piece> pieces;
+        private HashSet<Piece> capturedPieces;
+
+        // PROPERTIES
+
         public Board Board { get; private set; }
         public int Turn { get; private set; }
         public Color CurrentPlayer { get; private set; }
         public bool EndMatch { get; private set; }
-        private HashSet<Piece> pieces;
-        private HashSet<Piece> capturedPieces;
+        public bool IsInCheck { get; private set; }
+
+        // CONSTRUCTOR
 
         public ChessMatch()
         {
@@ -20,13 +28,16 @@ namespace Entities
             Turn = 1;
             CurrentPlayer = Color.White;
             EndMatch = false;
+            IsInCheck = false;
             pieces = new HashSet<Piece>();
             capturedPieces = new HashSet<Piece>();
 
             InsertPieces();
         }
 
-        public void ExecuteMovement(Position origin, Position destiny)
+        // FUNCTIONS
+
+        public Piece ExecuteMovement(Position origin, Position destiny)
         {
             Piece piece = Board.RemovePieceAt(origin);
             piece.IncrementNumberOfMovements();
@@ -37,13 +48,44 @@ namespace Entities
             {
                 capturedPieces.Add(otherPiece);
             }
+
+            return otherPiece;
         }
 
         public void PerformMove(Position origin, Position destiny)
         {
-            ExecuteMovement(origin, destiny);
+            Piece capturated = ExecuteMovement(origin, destiny);
+
+            if (IsKingInCheck(CurrentPlayer))
+            {
+                UndoMovement(origin, destiny, capturated);
+                throw new ChessException("You cannot put yourself in check!");
+            }
+
+            if (IsKingInCheck(WhoIsTheEnemy(CurrentPlayer)))
+            {
+                IsInCheck = true;
+            }
+            else
+            {
+                IsInCheck = false;
+            }
+
             Turn++;
             ChangePlayer();
+        }
+
+        private void UndoMovement(Position origin, Position destiny, Piece capturated)
+        {
+            Piece piece = Board.RemovePieceAt(destiny);
+            piece.DecrementNumberOfMovements();
+            if (capturated != null)
+            {
+                Board.InsertPieceAt(capturated, destiny);
+                capturedPieces.Remove(capturated);
+            }
+
+            Board.InsertPieceAt(piece, origin);
         }
 
         private void ChangePlayer()
@@ -82,14 +124,14 @@ namespace Entities
             }
         }
 
-        public void InsertNewPiece (char column, int row, Piece piece)
+        public void InsertNewPiece(char column, int row, Piece piece)
         {
             BoardPosition boardPosition = new BoardPosition(column, row);
             Board.InsertPieceAt(piece, boardPosition.ToPosition());
             pieces.Add(piece);
         }
 
-        private void InsertPieces ()
+        private void InsertPieces()
         {
             // White pieces
             InsertNewPiece('c', 1, new Rook(Board, Color.White));
@@ -98,7 +140,7 @@ namespace Entities
             InsertNewPiece('e', 2, new Rook(Board, Color.White));
             InsertNewPiece('e', 1, new Rook(Board, Color.White));
             InsertNewPiece('d', 1, new King(Board, Color.White));
-            
+
             // Black Pieces
             InsertNewPiece('c', 7, new Rook(Board, Color.Black));
             InsertNewPiece('c', 8, new Rook(Board, Color.Black));
@@ -108,7 +150,7 @@ namespace Entities
             InsertNewPiece('d', 8, new King(Board, Color.Black));
         }
 
-        public HashSet<Piece> GetCapturedPiecesByColor (Color color)
+        public HashSet<Piece> GetCapturedPiecesByColor(Color color)
         {
             HashSet<Piece> aux = new HashSet<Piece>();
             foreach (Piece piece in capturedPieces)
@@ -122,10 +164,10 @@ namespace Entities
             return aux;
         }
 
-        public HashSet<Piece> GetInGamePiecesByColor (Color color)
+        public HashSet<Piece> GetInGamePiecesByColor(Color color)
         {
             HashSet<Piece> aux = new HashSet<Piece>();
-            foreach (Piece piece in capturedPieces)
+            foreach (Piece piece in pieces)
             {
                 if (piece.Color == color)
                 {
@@ -136,6 +178,45 @@ namespace Entities
             aux.ExceptWith(GetCapturedPiecesByColor(color));
 
             return aux;
+        }
+
+        private Color WhoIsTheEnemy(Color color)
+        {
+            return (color == Color.White ? Color.Black : Color.White);
+        }
+
+        private Piece GetKing(Color color)
+        {
+            foreach (Piece piece in GetInGamePiecesByColor(color))
+            {
+                if (piece is King)
+                {
+                    return piece;
+                }
+            }
+
+            return null;
+        }
+
+        public bool IsKingInCheck(Color color)
+        {
+            Piece king = GetKing(color);
+            if (king == null)
+            {
+                throw new ChessException($"There is no King of the {color} color in the Board!");
+            }
+
+            HashSet<Piece> enemies = GetInGamePiecesByColor(WhoIsTheEnemy(color));
+            foreach (Piece enemy in enemies)
+            {
+                bool[,] possibleMovements = enemy.PossibleMovements();
+                if (possibleMovements[king.Position.Row, king.Position.Column])
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

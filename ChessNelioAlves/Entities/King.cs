@@ -81,6 +81,7 @@ namespace Entities
                 validPositions[position.Row, position.Column] = true;
             }
 
+            this.Position = new Position(originalRow, originalCol);
             return validPositions;
         }
     }

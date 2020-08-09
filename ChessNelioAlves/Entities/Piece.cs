@@ -22,6 +22,11 @@ namespace Entities
             NumberOfMovements++;
         }
 
+        public void DecrementNumberOfMovements()
+        {
+            NumberOfMovements--;
+        }
+
         public abstract bool[,] PossibleMovements();
 
         protected bool CanMoveToPosition(Position position)
