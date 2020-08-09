@@ -3,8 +3,12 @@ namespace Entities
 {
     public class Pawn : Piece
     {
-        public Pawn(Board board, Color color) : base(board, color)
-        { }
+        private ChessMatch match;
+
+        public Pawn(Board board, Color color, ChessMatch match) : base(board, color)
+        {
+            this.match = match;
+        }
 
         public override string ToString()
         {
@@ -58,6 +62,25 @@ namespace Entities
                 {
                     validPositions[position.Row, position.Column] = true;
                 }
+
+                // #specialmove En Passant
+                position = new Position(originalRow, originalCol);
+                if (position.Row == 3)
+                {
+                    Position left = new Position(position.Row, position.Column - 1);
+                    Piece leftPiece = Board.GetPieceAt(left);
+                    if (Board.PositionExists(left) && CanMoveToPosition(left) && leftPiece == match.VunerableEnPassant)
+                    {
+                        validPositions[left.Row - 1, left.Column] = true;
+                    }
+                    
+                    Position right = new Position(position.Row, position.Column + 1);
+                    Piece rightPiece = Board.GetPieceAt(right);
+                    if (Board.PositionExists(right) && CanMoveToPosition(right) && rightPiece == match.VunerableEnPassant)
+                    {
+                        validPositions[right.Row - 1, right.Column] = true;
+                    }
+                }
             }
             else
             {
@@ -86,6 +109,25 @@ namespace Entities
                 if (Board.PositionExists(position) && CanMoveToPosition(position))
                 {
                     validPositions[position.Row, position.Column] = true;
+                }
+
+                // #specialmove En Passant
+                position = new Position(originalRow, originalCol);
+                if (position.Row == 4)
+                {
+                    Position left = new Position(position.Row, position.Column - 1);
+                    Piece leftPiece = Board.GetPieceAt(left);
+                    if (Board.PositionExists(left) && CanMoveToPosition(left) && leftPiece == match.VunerableEnPassant)
+                    {
+                        validPositions[left.Row + 1, left.Column] = true;
+                    }
+
+                    Position right = new Position(position.Row, position.Column + 1);
+                    Piece rightPiece = Board.GetPieceAt(right);
+                    if (Board.PositionExists(right) && CanMoveToPosition(right) && rightPiece == match.VunerableEnPassant)
+                    {
+                        validPositions[right.Row + 1, right.Column] = true;
+                    }
                 }
             }
 

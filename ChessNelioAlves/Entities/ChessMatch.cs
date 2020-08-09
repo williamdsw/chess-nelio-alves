@@ -1,6 +1,8 @@
 ﻿
 using Entities.Exceptions;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace Entities
 {
@@ -9,8 +11,8 @@ namespace Entities
         // FIELDS
 
         private HashSet<Piece> pieces;
-        private HashSet<Piece> capturedPieces;
-
+        private HashSet<Piece> capturatedPieces;
+        
         // PROPERTIES
 
         public Board Board { get; private set; }
@@ -18,6 +20,7 @@ namespace Entities
         public Color CurrentPlayer { get; private set; }
         public bool EndMatch { get; private set; }
         public bool IsInCheck { get; private set; }
+        public Piece VunerableEnPassant { get; private set; }
 
         // CONSTRUCTOR
 
@@ -29,8 +32,9 @@ namespace Entities
             CurrentPlayer = Color.White;
             EndMatch = false;
             IsInCheck = false;
+            VunerableEnPassant = null;
             pieces = new HashSet<Piece>();
-            capturedPieces = new HashSet<Piece>();
+            capturatedPieces = new HashSet<Piece>();
 
             InsertPieces();
         }
@@ -41,12 +45,12 @@ namespace Entities
         {
             Piece piece = Board.RemovePieceAt(origin);
             piece.IncrementNumberOfMovements();
-            Piece otherPiece = Board.RemovePieceAt(destiny);
+            Piece capturared = Board.RemovePieceAt(destiny);
             Board.InsertPieceAt(piece, destiny);
 
-            if (otherPiece != null)
+            if (capturared != null)
             {
-                capturedPieces.Add(otherPiece);
+                capturatedPieces.Add(capturared);
             }
 
             // #specialmove Little Rock
@@ -69,7 +73,80 @@ namespace Entities
                 Board.InsertPieceAt(rook, rookDestiny);
             }
 
-            return otherPiece;
+            // #specialmove En Passant
+            if (piece is Pawn)
+            {
+                if (origin.Column != destiny.Column && capturared == null)
+                {
+                    Position pawnPosition;
+                    if (piece.Color == Color.White)
+                    {
+                        pawnPosition = new Position(destiny.Row + 1, destiny.Column);
+                    }
+                    else
+                    {
+                        pawnPosition = new Position(destiny.Row - 1, destiny.Column);
+                    }
+
+                    capturared = Board.RemovePieceAt(pawnPosition);
+                    capturatedPieces.Add(capturared);
+                }
+            }
+
+            return capturared;
+        }
+
+        private void UndoMovement(Position origin, Position destiny, Piece capturated)
+        {
+            Piece piece = Board.RemovePieceAt(destiny);
+            piece.DecrementNumberOfMovements();
+            if (capturated != null)
+            {
+                Board.InsertPieceAt(capturated, destiny);
+                capturatedPieces.Remove(capturated);
+            }
+
+            Board.InsertPieceAt(piece, origin);
+
+            // #specialmove Castling
+            if (piece is King && destiny.Column == origin.Column + 2)
+            {
+                Position rookOrigin = new Position(origin.Row, origin.Column + 3);
+                Position rookDestiny = new Position(origin.Row, origin.Column + 1);
+                Piece rook = Board.RemovePieceAt(rookDestiny);
+                rook.DecrementNumberOfMovements();
+                Board.InsertPieceAt(rook, rookOrigin);
+            }
+
+            // #specialmove Castling
+            if (piece is King && destiny.Column == origin.Column - 2)
+            {
+                Position rookOrigin = new Position(origin.Row, origin.Column - 4);
+                Position rookDestiny = new Position(origin.Row, origin.Column - 1);
+                Piece rook = Board.RemovePieceAt(rookDestiny);
+                rook.DecrementNumberOfMovements();
+                Board.InsertPieceAt(rook, rookOrigin);
+            }
+
+            // #specialmove En Passant
+            if (piece is Pawn)
+            {
+                if (origin.Column != destiny.Column && capturated == VunerableEnPassant)
+                {
+                    Piece pawn = Board.RemovePieceAt(destiny);
+                    Position pawnPosition;
+                    if (pawn.Color == Color.White)
+                    {
+                        pawnPosition = new Position(3, destiny.Column);
+                    }
+                    else
+                    {
+                        pawnPosition = new Position(4, destiny.Column);
+                    }
+
+                    Board.InsertPieceAt(pawn, pawnPosition);
+                }
+            }
         }
 
         public void PerformMove(Position origin, Position destiny)
@@ -100,45 +177,24 @@ namespace Entities
                 Turn++;
                 ChangePlayer();
             }
+
+            Piece piece = Board.GetPieceAt(destiny);
+
+            // #specialmove En Passant
+            if (piece is Pawn && (destiny.Row == origin.Row - 2 || destiny.Row == origin.Row + 2))
+            {
+                VunerableEnPassant = piece;
+            }
+            else
+            {
+                VunerableEnPassant = null;
+            }
         }
 
         public void PassTurn()
         {
             Turn++;
             ChangePlayer();
-        }
-
-        private void UndoMovement(Position origin, Position destiny, Piece capturated)
-        {
-            Piece piece = Board.RemovePieceAt(destiny);
-            piece.DecrementNumberOfMovements();
-            if (capturated != null)
-            {
-                Board.InsertPieceAt(capturated, destiny);
-                capturedPieces.Remove(capturated);
-            }
-
-            Board.InsertPieceAt(piece, origin);
-
-            // #specialmove Castling
-            if (piece is King && destiny.Column == origin.Column + 2)
-            {
-                Position rookOrigin = new Position(origin.Row, origin.Column + 3);
-                Position rookDestiny = new Position(origin.Row, origin.Column + 1);
-                Piece rook = Board.RemovePieceAt(rookDestiny);
-                rook.DecrementNumberOfMovements();
-                Board.InsertPieceAt(rook, rookOrigin);
-            }
-
-            // #specialmove Castling
-            if (piece is King && destiny.Column == origin.Column - 2)
-            {
-                Position rookOrigin = new Position(origin.Row, origin.Column - 4);
-                Position rookDestiny = new Position(origin.Row, origin.Column - 1);
-                Piece rook = Board.RemovePieceAt(rookDestiny);
-                rook.DecrementNumberOfMovements();
-                Board.InsertPieceAt(rook, rookOrigin);
-            }
         }
 
         private void ChangePlayer()
@@ -229,14 +285,14 @@ namespace Entities
             InsertNewPiece('f', 1, new Bishop(Board, Color.White));
             InsertNewPiece('g', 1, new Knight(Board, Color.White));
             InsertNewPiece('h', 1, new Rook(Board, Color.White));
-            InsertNewPiece('a', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('b', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('c', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('d', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('e', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('f', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('g', 2, new Pawn(Board, Color.White));
-            InsertNewPiece('h', 2, new Pawn(Board, Color.White));
+            InsertNewPiece('a', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('b', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('c', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('d', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('e', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('f', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('g', 2, new Pawn(Board, Color.White, this));
+            InsertNewPiece('h', 2, new Pawn(Board, Color.White, this));
             
             // Black pieces
             InsertNewPiece('a', 8, new Rook(Board, Color.Black));
@@ -247,20 +303,20 @@ namespace Entities
             InsertNewPiece('f', 8, new Bishop(Board, Color.Black));
             InsertNewPiece('g', 8, new Knight(Board, Color.Black));
             InsertNewPiece('h', 8, new Rook(Board, Color.Black));
-            InsertNewPiece('a', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('b', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('c', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('d', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('e', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('f', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('g', 7, new Pawn(Board, Color.Black));
-            InsertNewPiece('h', 7, new Pawn(Board, Color.Black));
+            InsertNewPiece('a', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('b', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('c', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('d', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('e', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('f', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('g', 7, new Pawn(Board, Color.Black, this));
+            InsertNewPiece('h', 7, new Pawn(Board, Color.Black, this));
         }
 
         public HashSet<Piece> GetCapturedPiecesByColor(Color color)
         {
             HashSet<Piece> aux = new HashSet<Piece>();
-            foreach (Piece piece in capturedPieces)
+            foreach (Piece piece in capturatedPieces)
             {
                 if (piece.Color == color)
                 {
