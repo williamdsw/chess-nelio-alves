@@ -1,6 +1,7 @@
 ﻿
 using Entities;
 using System;
+using System.Collections.Generic;
 
 namespace ChessNelioAlves
 {
@@ -91,6 +92,41 @@ namespace ChessNelioAlves
             char column = position[0];
             int row = int.Parse(position[1] + "");
             return new BoardPosition(column, row);
+        }
+
+        public static void RenderMatch (ChessMatch chessMatch)
+        {
+            RenderBoard(chessMatch.Board);
+            Console.WriteLine();
+            RenderCapturedPieces(chessMatch);
+            Console.WriteLine();
+            Console.WriteLine($"Turn: {chessMatch.Turn}");
+            Console.WriteLine($"Waiting for player {chessMatch.CurrentPlayer}");
+        }
+
+        public static void RenderCapturedPieces(ChessMatch chessMatch)
+        {
+            Console.WriteLine("Captured Pieces:");
+            Console.Write("White: ");
+            RenderSet(chessMatch.GetCapturedPiecesByColor(Color.White));
+
+            Console.Write("\nBlack: ");
+            ConsoleColor consoleColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            RenderSet(chessMatch.GetCapturedPiecesByColor(Color.Black));
+            Console.ForegroundColor = consoleColor;
+
+            Console.WriteLine();
+        }
+
+        public static void RenderSet(HashSet<Piece> pieces)
+        {
+            Console.Write("[");
+            foreach (Piece piece in pieces)
+            {
+                Console.Write($" {piece} ");
+            }
+            Console.Write("]");
         }
     }
 }

@@ -15,10 +15,7 @@ namespace ChessNelioAlves
                 try
                 {
                     Console.Clear();
-                    Screen.RenderBoard(chessMatch.Board);
-                    Console.WriteLine();
-                    Console.WriteLine($"Turn: {chessMatch.Turn}");
-                    Console.WriteLine($"Waiting for player {chessMatch.CurrentPlayer}");
+                    Screen.RenderMatch(chessMatch);
 
                     Console.WriteLine();
                     Console.Write("Input origin position: ");

@@ -1,5 +1,6 @@
 ﻿
 using Entities.Exceptions;
+using System.Collections.Generic;
 
 namespace Entities
 {
@@ -9,13 +10,19 @@ namespace Entities
         public int Turn { get; private set; }
         public Color CurrentPlayer { get; private set; }
         public bool EndMatch { get; private set; }
+        private HashSet<Piece> pieces;
+        private HashSet<Piece> capturedPieces;
 
         public ChessMatch()
         {
+            // Default values
             Board = new Board(8, 8);
             Turn = 1;
             CurrentPlayer = Color.White;
             EndMatch = false;
+            pieces = new HashSet<Piece>();
+            capturedPieces = new HashSet<Piece>();
+
             InsertPieces();
         }
 
@@ -25,6 +32,11 @@ namespace Entities
             piece.IncrementNumberOfMovements();
             Piece otherPiece = Board.RemovePieceAt(destiny);
             Board.InsertPieceAt(piece, destiny);
+
+            if (otherPiece != null)
+            {
+                capturedPieces.Add(otherPiece);
+            }
         }
 
         public void PerformMove(Position origin, Position destiny)
@@ -70,21 +82,60 @@ namespace Entities
             }
         }
 
+        public void InsertNewPiece (char column, int row, Piece piece)
+        {
+            BoardPosition boardPosition = new BoardPosition(column, row);
+            Board.InsertPieceAt(piece, boardPosition.ToPosition());
+            pieces.Add(piece);
+        }
+
         private void InsertPieces ()
         {
-            Board.InsertPieceAt(new Rook(Board, Color.White), new BoardPosition('c', 1).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.White), new BoardPosition('c', 2).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.White), new BoardPosition('d', 2).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.White), new BoardPosition('e', 2).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.White), new BoardPosition('e', 1).ToPosition());
-            Board.InsertPieceAt(new King(Board, Color.White), new BoardPosition('d', 1).ToPosition());
+            // White pieces
+            InsertNewPiece('c', 1, new Rook(Board, Color.White));
+            InsertNewPiece('c', 2, new Rook(Board, Color.White));
+            InsertNewPiece('d', 2, new Rook(Board, Color.White));
+            InsertNewPiece('e', 2, new Rook(Board, Color.White));
+            InsertNewPiece('e', 1, new Rook(Board, Color.White));
+            InsertNewPiece('d', 1, new King(Board, Color.White));
+            
+            // Black Pieces
+            InsertNewPiece('c', 7, new Rook(Board, Color.Black));
+            InsertNewPiece('c', 8, new Rook(Board, Color.Black));
+            InsertNewPiece('d', 7, new Rook(Board, Color.Black));
+            InsertNewPiece('e', 7, new Rook(Board, Color.Black));
+            InsertNewPiece('e', 8, new Rook(Board, Color.Black));
+            InsertNewPiece('d', 8, new King(Board, Color.Black));
+        }
 
-            Board.InsertPieceAt(new Rook(Board, Color.Black), new BoardPosition('c', 7).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.Black), new BoardPosition('c', 8).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.Black), new BoardPosition('d', 7).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.Black), new BoardPosition('e', 7).ToPosition());
-            Board.InsertPieceAt(new Rook(Board, Color.Black), new BoardPosition('e', 8).ToPosition());
-            Board.InsertPieceAt(new King(Board, Color.Black), new BoardPosition('d', 8).ToPosition());
+        public HashSet<Piece> GetCapturedPiecesByColor (Color color)
+        {
+            HashSet<Piece> aux = new HashSet<Piece>();
+            foreach (Piece piece in capturedPieces)
+            {
+                if (piece.Color == color)
+                {
+                    aux.Add(piece);
+                }
+            }
+
+            return aux;
+        }
+
+        public HashSet<Piece> GetInGamePiecesByColor (Color color)
+        {
+            HashSet<Piece> aux = new HashSet<Piece>();
+            foreach (Piece piece in capturedPieces)
+            {
+                if (piece.Color == color)
+                {
+                    aux.Add(piece);
+                }
+            }
+
+            aux.ExceptWith(GetCapturedPiecesByColor(color));
+
+            return aux;
         }
     }
 }
