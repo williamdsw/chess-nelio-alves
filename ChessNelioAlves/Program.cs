@@ -17,24 +17,34 @@ namespace ChessNelioAlves
                     Console.Clear();
                     Screen.RenderMatch(chessMatch);
 
-                    Console.WriteLine();
-                    Console.Write("Input origin position: ");
-                    Position origin = Screen.ReadPosition().ToPosition();
+                    Console.Write("Do you wish to pass the turn (y/n) ? ");
+                    char pass = char.Parse(Console.ReadLine());
+                    if (pass == 'y')
+                    {
+                        chessMatch.PassTurn();
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.Write("Input origin position: ");
 
-                    chessMatch.ValidateOriginPosition(origin);
+                        Position origin = Screen.ReadPosition().ToPosition();
 
-                    bool[,] possiblePositions = chessMatch.Board.GetPieceAt(origin).PossibleMovements();
+                        chessMatch.ValidateOriginPosition(origin);
 
-                    Console.Clear();
-                    Screen.RenderBoard(chessMatch.Board, possiblePositions);
+                        bool[,] possiblePositions = chessMatch.Board.GetPieceAt(origin).PossibleMovements();
 
-                    Console.WriteLine();
-                    Console.Write("Input destiny position: ");
-                    Position destiny = Screen.ReadPosition().ToPosition();
+                        Console.Clear();
+                        Screen.RenderBoard(chessMatch.Board, possiblePositions);
 
-                    chessMatch.ValidateDestinyPosition(origin, destiny);
+                        Console.WriteLine();
+                        Console.Write("Input destiny position: ");
+                        Position destiny = Screen.ReadPosition().ToPosition();
 
-                    chessMatch.PerformMove(origin, destiny);
+                        chessMatch.ValidateDestinyPosition(origin, destiny);
+
+                        chessMatch.PerformMove(origin, destiny);
+                    }
                 }
                 catch (ChessException exception)
                 {
@@ -46,6 +56,9 @@ namespace ChessNelioAlves
                     Console.WriteLine(exception.Message);
                 }
             }
+
+            Console.Clear();
+            Screen.RenderMatch(chessMatch);
 
             Console.ReadLine();
         }

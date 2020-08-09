@@ -71,6 +71,19 @@ namespace Entities
                 IsInCheck = false;
             }
 
+            if (TestCheckMate(WhoIsTheEnemy(CurrentPlayer)))
+            {
+                EndMatch = true;
+            }
+            else
+            {
+                Turn++;
+                ChangePlayer();
+            }
+        }
+
+        public void PassTurn()
+        {
             Turn++;
             ChangePlayer();
         }
@@ -124,6 +137,40 @@ namespace Entities
             }
         }
 
+        public bool TestCheckMate(Color color)
+        {
+            if (!IsKingInCheck(color))
+            {
+                return false;
+            }
+
+            foreach (Piece piece in GetInGamePiecesByColor(color))
+            {
+                bool[,] possibleMovements = piece.PossibleMovements();
+                for (int i = 0; i < Board.Rows; i++)
+                {
+                    for (int j = 0; j < Board.Columns; j++)
+                    {
+                        if (possibleMovements[i, j])
+                        {
+                            Position origin = piece.Position;
+                            Position destiny = new Position(i, j);
+                            Piece capturated = ExecuteMovement(origin, destiny);
+                            bool isInCheck = IsKingInCheck(color);
+                            UndoMovement(origin, destiny, capturated);
+
+                            if (!isInCheck)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public void InsertNewPiece(char column, int row, Piece piece)
         {
             BoardPosition boardPosition = new BoardPosition(column, row);
@@ -133,6 +180,7 @@ namespace Entities
 
         private void InsertPieces()
         {
+            /*
             // White pieces
             InsertNewPiece('c', 1, new Rook(Board, Color.White));
             InsertNewPiece('c', 2, new Rook(Board, Color.White));
@@ -147,7 +195,17 @@ namespace Entities
             InsertNewPiece('d', 7, new Rook(Board, Color.Black));
             InsertNewPiece('e', 7, new Rook(Board, Color.Black));
             InsertNewPiece('e', 8, new Rook(Board, Color.Black));
-            InsertNewPiece('d', 8, new King(Board, Color.Black));
+            InsertNewPiece('d', 8, new King(Board, Color.Black));*/
+            
+            // TEST CHECKMATE
+            // White pieces
+            InsertNewPiece('c', 1, new Rook(Board, Color.White));
+            InsertNewPiece('d', 1, new King(Board, Color.White));
+            InsertNewPiece('h', 7, new Rook(Board, Color.White));
+
+            // Black Pieces
+            InsertNewPiece('a', 8, new King(Board, Color.Black));
+            InsertNewPiece('b', 8, new Rook(Board, Color.Black));
         }
 
         public HashSet<Piece> GetCapturedPiecesByColor(Color color)

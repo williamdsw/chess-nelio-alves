@@ -101,12 +101,23 @@ namespace ChessNelioAlves
             RenderCapturedPieces(chessMatch);
             Console.WriteLine();
             Console.WriteLine($"Turn: {chessMatch.Turn}");
-            Console.WriteLine($"Waiting for player {chessMatch.CurrentPlayer}");
 
-            if (chessMatch.IsInCheck)
+            if (!chessMatch.EndMatch)
             {
-                Console.WriteLine("CHECK!");
+                Console.WriteLine($"Waiting for player {chessMatch.CurrentPlayer}");
+
+                if (chessMatch.IsInCheck)
+                {
+                    Console.WriteLine("CHECK!");
+                }
             }
+            else
+            {
+                Console.WriteLine("CHECKMATE!");
+                Console.WriteLine($"Winner: {chessMatch.CurrentPlayer}");
+            }
+
+            
         }
 
         public static void RenderCapturedPieces(ChessMatch chessMatch)
