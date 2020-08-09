@@ -159,6 +159,22 @@ namespace Entities
                 throw new ChessException("You cannot put yourself in check!");
             }
 
+            Piece piece = Board.GetPieceAt(destiny);
+
+            // #specialmove promotion
+            if (piece is Pawn)
+            {
+                if ((piece.Color == Color.White && destiny.Row == 0) || 
+                    (piece.Color == Color.Black && destiny.Row == 7))
+                {
+                    piece = Board.RemovePieceAt(destiny);
+                    pieces.Remove(piece);
+                    Piece queen = new Queen(Board, piece.Color);
+                    Board.InsertPieceAt(queen, destiny);
+                    pieces.Add(queen);
+                }
+            }
+
             if (IsKingInCheck(WhoIsTheEnemy(CurrentPlayer)))
             {
                 IsInCheck = true;
@@ -177,8 +193,6 @@ namespace Entities
                 Turn++;
                 ChangePlayer();
             }
-
-            Piece piece = Board.GetPieceAt(destiny);
 
             // #specialmove En Passant
             if (piece is Pawn && (destiny.Row == origin.Row - 2 || destiny.Row == origin.Row + 2))
