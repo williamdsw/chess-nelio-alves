@@ -29,7 +29,7 @@ namespace Entities
 
         public abstract bool[,] PossibleMovements();
 
-        protected bool CanMoveToPosition(Position position)
+        protected virtual bool CanMoveToPosition(Position position)
         {
             Piece piece = Board.GetPieceAt(position);
             return piece == null || piece.Color != this.Color;
